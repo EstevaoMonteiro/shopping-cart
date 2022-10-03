@@ -1,4 +1,3 @@
-// Commit Inicial:
 // Esse tipo de comentário que estão antes de todas as funções são chamados de JSdoc,
 // experimente passar o mouse sobre o nome das funções e verá que elas possuem descrições! 
 
@@ -9,7 +8,7 @@
  * @param {string} imageSource - URL da imagem.
  * @returns {Element} Elemento de imagem do produto.
  */
-const createProductImageElement = (imageSource) => {
+ const createProductImageElement = (imageSource) => {
   const img = document.createElement('img');
   img.className = 'item__image';
   img.src = imageSource;
@@ -38,6 +37,10 @@ const createCustomElement = (element, className, innerText) => {
  * @param {string} product.thumbnail - URL da imagem do produto.
  * @returns {Element} Elemento de produto.
  */
+
+ const loading = document.getElementsByClassName('loading')[0];
+ const cartItems = document.getElementsByClassName('cart__items')[0];
+ 
 const createProductItemElement = ({ id, title, thumbnail }) => {
   const section = document.createElement('section');
   section.className = 'item';
@@ -47,6 +50,7 @@ const createProductItemElement = ({ id, title, thumbnail }) => {
   section.appendChild(createProductImageElement(thumbnail));
   section.appendChild(createCustomElement('button', 'item__add', 'Adicionar ao carrinho!'));
 
+  loading.remove();
   return section;
 };
 
@@ -65,6 +69,20 @@ const getIdFromProductItem = (product) => product.querySelector('span.id').inner
  * @param {string} product.price - Preço do produto.
  * @returns {Element} Elemento de um item do carrinho.
  */
+
+ const listarProdutos = async () => {
+  const itens = await fetchProducts('computador');
+  const itemClass = document.querySelector('.items');
+  await itens.results.forEach((elemento) => {
+      itemClass.appendChild(createProductItemElement(elemento));
+  });
+};
+
+const cartItemClickListener = (event) => {
+  event.target.remove();
+  saveCartItems(cartItems.innerHTML);
+};
+
 const createCartItemElement = ({ id, title, price }) => {
   const li = document.createElement('li');
   li.className = 'cart__item';
@@ -73,4 +91,36 @@ const createCartItemElement = ({ id, title, price }) => {
   return li;
 };
 
-window.onload = () => { };
+const elemento1 = async (e) => {
+    const getElement = e.path[1];
+    const getElement2 = getElement.firstChild.innerText;
+    cartItems.appendChild(createCartItemElement(await fetchItem(getElement2)));
+    saveCartItems(cartItems.innerText);
+};
+
+const comprasCarrinho = () => {
+  const itemAdd = document.querySelectorAll('.item__add');
+  itemAdd.forEach((e) => {
+    e.addEventListener('click', elemento1);
+  });
+};
+
+const elemento2 = () => {
+  const cartItem = document.querySelectorAll('.cart__item');
+  cartItem.forEach((item) => {
+    item.remove();
+    cartItems.innerText = 0;
+    totalPrice = 0;
+  });
+};
+
+const eventClick = () => {
+  const emptyCart = document.querySelector('.empty-cart');
+  emptyCart.addEventListener('click', elemento2);
+};
+
+window.onload = async () => {
+  await listarProdutos();
+  await comprasCarrinho();
+  await eventClick();
+};
